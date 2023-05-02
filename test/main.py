@@ -11,11 +11,11 @@ app.config.update(TEMPLATES_AUTO_RELOAD=True)
 
 @app.route('/')
 def landing_page():
-    return app.send_static_file('index.html')
+    return render_template('landing.html')
 
-@app.route('/home')
+@app.route('/location-select')
 def home():
-    return render_template('index.html')
+    return render_template('location_select.html')
 
 CROP_RECOMMENDATION_ARGS = ['temperature', 'humidity', 'rainfall', 'ph', 'n-val', 'p-val', 'k-val']
 

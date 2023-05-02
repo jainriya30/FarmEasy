@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <title>FarmEasy</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://kit.fontawesome.com/068f1419a7.js" crossorigin="anonymous"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+    </style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+    </style>
+
+</head>
+
+<body>
+
+
+    <!-- NAVBAR -->
+    <section class="navbar-sec">
+        <!-- <div class="container-fluid"> -->
+        <nav class="navbar navbar-expand-md navbar-dark bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#Home">
+                    <img class="img-logo" src="images/farmeasy-logo.svg" alt="logo" class="d-inline-block align-text-top">
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#services">Services</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#news">News</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#contact-us">Contact us</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- </div> -->
+    </section>
+
+    <section id="hero">
+        
+        <div class="hero-class">
+            <div class="hero-text">
+                FarmEasy is a one-stop application that guides farmers to grow better crops at the right time & place.
+                
+                <div>
+                    <a class="btn btn-success btn-lg hero-btn" href="#services" role="button">Check our Services</a>
+    
+                </div>
+
+                
+            </div>
+             
+             <div class="hero-img-cont">
+                 <img class="hero-img" src="images/hero-img.svg">
+     
+             </div>
+        </div>
+       
+    </section>
+
+
+    <!-- Services -->
+    <section id="services">
+        <div class="container services1">
+            <h1 >Services</h1>
+            <div class="cards row justify-content-evenly gy-5">
+                <div class="col-md-2 services-card">
+                    <div class="icons mx-auto">
+                        <i class="fa-solid fa-wheat-awn fa-2x fag" style="color: #2b9348; padding-top: 20px; margin-top: 0px;"></i>
+                    </div>
+                    <h6 class="card-head">Crop recommendation</h6>
+                    <h6 class="card-text">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Laudantium, odio.</h7>
+                    <div>
+                        <a href="/crop-recommendation" class="btn btn-success btn-xs btn-card" role="button">Check now</a>
+                    </div>
+                </div>
+                <div class="col-md-2 services-card">
+                    <div class="icons mx-auto">
+                        <i class="fa-solid fa-indian-rupee-sign fa-2x fag" style="color: #2b9348; padding-top: 20px; margin-top: 0px;"></i>
+                    </div>
+                    <h6 class="card-head">Price prediction for crops</h6>
+                    <h6 class="card-text">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Iure, facere?</h6>
+                    <div>
+                        <a href="/price-prediction" class="btn btn-success btn-xs btn-card" role="button">Check now</a>
+                    </div>
+                </div>
+                <div class="col-md-2 services-card">
+                    <div class="icons mx-auto">
+                        <i class="fa-solid fa-location-dot fa-2x fag" style="color: #2b9348; padding-top: 20px; margin-top: 0px;"></i>
+                    </div>
+                    <h6 class="card-head">State-wise crops distribution</h6>
+                    <h6 class="card-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatum, totam!</h6>
+                    <div>
+                        <a href="/top-crops" class="btn btn-success btn-xs btn-card" role="button">Check now</a>
+                    </div>
+                </div>
+            
+        </div>
+    </section>
+
+
+    <section id="news">
+        <h1 class="news-head">News</h1>
+        <div id="carouselExample" class="carousel slide">
+            <div class="carousel-inner">
+              <div class="carousel-item active">
+                <img src="https://source.unsplash.com/1920x1080/?farm">
+              </div>
+              <div class="carousel-item">
+                <img src="https://source.unsplash.com/1920x1080/?farming">
+              </div>
+              <div class="carousel-item">
+                <img src="https://source.unsplash.com/1920x1080/?agriculture">
+              </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Next</span>
+            </button>
+          </div>
+         
+    </section>
+
+
+
+    <!-- Contact US -->
+    <section id="contact-us">
+        <div class="container-fluid contact1 m-auto">
+            <h1 class="contact-head">Contact Us</h1>
+            <div class="container-fluid contact-div">
+                <div class="row justify-content-evenly">
+                    <div class="col-3 contact-card">
+                        <div class="c-icons mx-auto">
+                            <i class="fa-solid fa-location-dot fa-2x fag-2"></i>
+                        </div>
+                        <h6 class="contact-icon-text">Address</h6>
+
+
+                    </div>
+                    <div class="col-3 contact-card">
+                        <div class="c-icons mx-auto">
+                            <i class="fa-solid fa-phone fa-2x fag-2"></i>
+                        </div>
+                        <h6 class="contact-icon-text">Phone</h6>
+
+                    </div>
+                    <div class="col-3 contact-card">
+                        <div class="c-icons mx-auto">
+                            <i class="fa-solid fa-envelope fa-2x fag-2"></i>
+                        </div>
+                        <h6 class="contact-icon-text">Mail</h6>
+                    </div>
+                </div>
+                <div class="forms">
+                    <form>
+                        <div class="row justify-content-evenly">
+                            <div class="col-md-5 name-col">
+                                <label for="" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="" aria-describedby="Name">
+                                <label for="exampleInputEmail1" class="form-label">Email address</label>
+                                <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                                <div id="emailHelp" class="form-text">We'll never share your email with anyone.</div>
+                                <label for="" class="form-label">Phone</label>
+                                <input type="text" class="form-control" id="" aria-describedby="Phone">
+                                <label for="" class="form-label">Subject</label>
+                                <input type="text" class="form-control" id="" aria-describedby="Subject">
+                            </div>
+                            <div class="col-md-5 name-col">
+                                <label for="exampleFormControlTextarea1" class="form-label">Message</label>
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="9"></textarea>
+                                <div class="d-grid gap-1 col-3 mx-end btn-form">
+                                    <button class="btn btn-success btn-sm" type="button">Message</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    {% include "footer.html" %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+
+
+</body>
+
+</html>

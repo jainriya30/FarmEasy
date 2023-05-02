@@ -1,9 +1,22 @@
 let all_states = {{ states }};
 
+function fix_missing_state(state_name) {
+  if (state_name == "Telangana") return "Andhra Pradesh";
+  if (state_name == "Ladakh") return "Jammu and Kashmir";
+  return state_name;
+}
+
 function highlight_states(states) {
+
   _clear_existing_highlight();
+  simplemaps_countrymap.refresh();
+
+  if (states.length == 0) return;
+
+  states = JSON.parse(states);  
   for(var i in states) {
     var state_name = states[i];
+    state_name = fix_missing_state(state_name);
     var state_index = all_states.indexOf(state_name);
 
     var state_data = simplemaps_countrymap_mapdata.state_specific[state_index];
@@ -27,7 +40,7 @@ function clear_existing_highlight() {
 var simplemaps_countrymap_mapdata={
     main_settings: {
       /* General settings */
-      width: "responsive", //'700' or 'responsive'
+      width: "responsive",
       background_color: "#ffffff",
       background_transparent: "yes",
       border_color: "black",

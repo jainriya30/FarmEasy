@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Crop Prediction</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.css" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <style>
+      #search-box {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 999;
+        background-color: #fff;
+        padding: 10px;
+        border-radius: 5px;
+      }
+
+      #search-results {
+        position: absolute;
+        top: 50px;
+        left: 10px;
+
+        z-index: 999;
+        background-color: #fff;
+        max-height: 200px;
+        max-width: 100%;
+        overflow-y: scroll;
+        padding: 5px;
+        border-radius: 5px;
+      }
+
+      #search-results li {
+        list-style: none;
+        margin: 5px 0;
+        padding: 5px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+      }
+
+      #search-container input[type="text"] {
+        width: 100%;
+        box-sizing: border-box;
+        border: none;
+        padding: 5px;
+        font-size: 16px;
+      }
+
+      #search-results li:hover {
+        background-color: #f0f0f0;
+      }
+
+      .location-btn {
+        position: absolute;
+        bottom: 20px;
+        right: 10px;
+        z-index: 1000;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 5px;
+        cursor: pointer;
+      }
+
+      .fa-crosshairs {
+        color: gray;
+      }
+
+      .fa-crosshairs:hover {
+        color: black;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="map" style="height: 500px;"></div>
+    <div id="search-box">
+      <input type="text" id="search-input" placeholder="Search for a location..." />
+    </div>
+    <div id="search-results"></div>
+    <script>
+      var map = L.map('map').setView([51.505, -0.09], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+        maxZoom: 18,
+      }).addTo(map);
+
+
+      function markLocation(lat, lng) {
+          $(".leaflet-marker-icon").remove();
+          L.marker([lat, lng]).addTo(map);
+      }
+
+      markLocation(51.505, -0.09);
+
+      var searchInput = document.getElementById('search-input');
+      var searchResults = document.getElementById('search-results');
+
+      function searchLocation(query) {
+        var url = 'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(query) + '&format=json';
+        fetch(url)
+          .then(function(response) {
+            return response.json();
+          })
+          .then(function(data) {
+            var results = data.map(function(result) {
+              return {
+                name: result.display_name,
+                latlng: L.latLng(result.lat, result.lon)
+              };
+            });
+
+            displaySearchResults(results);
+          })
+          .catch(function(error) {
+            console.error('Error searching for location:', error);
+          });
+      }
+
+      function displaySearchResults(results) {
+        var html = '';
+        for (var i = 0; i < results.length; i++) {
+          html += '<li data-lat="' + results[i].latlng.lat + '" data-lng="' + results[i].latlng.lng + '">' + results[i].name + '</li>';
+        }
+        searchResults.innerHTML = html;
+
+        var resultItems = searchResults.getElementsByTagName('li');
+        for (var i = 0; i < resultItems.length; i++) {
+          resultItems[i].addEventListener('click', function() {
+            var lat = this.getAttribute('data-lat');
+            var lng = this.getAttribute('data-lng');
+            map.setView(L.latLng(lat, lng), 13);
+            searchResults.innerHTML = "";
+          });
+        }
+      }
+
+      searchInput.addEventListener('input', function() {
+        var query = this.value.trim();
+        if (query.length < 3) {
+          searchResults.innerHTML = '';
+          return;
+        }
+
+        searchLocation(query);
+      });
+
+      const locationBtn = L.DomUtil.create("div", "location-btn");
+      locationBtn.innerHTML = `<i class="fa fa-crosshairs fa-2x" aria-hidden="true"></i>`;
+      locationBtn.addEventListener("click", () => {
+        map.locate({ setView: true, maxZoom: 16 });
+      });
+
+      map.on("locationfound", (e) => {
+        const radius = e.accuracy / 2;
+        console.log(e.latlng);
+        console.log(e.latlng[0]);
+        console.log(e.latlng[1]);
+
+      });
+
+      map.on("locationerror", (e) => {
+        alert("Unable to fetch the current location. Please");
+        console.log(e.message);
+      });
+
+      map.getContainer().appendChild(locationBtn);
+    </script>
+  </body>
+</html>
