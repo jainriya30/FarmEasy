@@ -24,7 +24,6 @@ CROP_RECOMMENDATION_ARGS = ['temperature', 'humidity', 'rainfall', 'ph', 'n-val'
 
 @app.route('/crop-recommendation', methods=["GET", "POST"])
 def crop_prediction_page():
-    print(request.form)
     if request.method == "POST":
         try:
             temperature = request.form["temperature"]
@@ -35,13 +34,13 @@ def crop_prediction_page():
             p = request.form["p-val"]
             k = request.form["k-val"]
 
-            crop = crop_recommender.recommend(n, p, k, temperature, humidity, ph, rainfall)
-            
-            return json.dumps(crop)
+            recommendations = crop_recommender.recommend(n, p, k, temperature, humidity, ph, rainfall)            
+
+            return render_template("results.html", recommendations=recommendations)
 
         except KeyError as e:
             traceback.print_exc()
-            abort(e)
+            abort(400)
 
     return render_template('crop_recommendation.html')
 
@@ -142,4 +141,3 @@ def test():
 
 if __name__ == '__main__':
     app.run(debug=True)
-    
