@@ -6,7 +6,7 @@ import os
 PACKAGE_DIR = os.path.dirname(__file__)
 
 # Path where pre-trained models could be available
-PRE_TRAINED_MODELS = os.path.join(PACKAGE_DIR, 'pretrained_models')
+PRE_TRAINED_MODELS_DIR_PATH = os.path.join(PACKAGE_DIR, 'pretrained_models')
 
 # Path where the datasets required by the module are located
 DATASETS_DIR_PATH = os.path.join(PACKAGE_DIR, 'datasets')

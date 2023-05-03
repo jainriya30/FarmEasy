@@ -2,31 +2,80 @@ from os import path
 from threading import Thread
 import pandas as pd
 from time import sleep
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeRegressor
 from sklearn.model_selection import train_test_split
+from .weather_data import WeatherForecaster
+import datetime
+import pickle
 
-from .constants import PRICE_DATASETS_DIR_PATH
+from .constants import PRICE_DATASETS_DIR_PATH, PRE_TRAINED_MODELS_DIR_PATH
+
+weather_forecaster = WeatherForecaster()
 
 class PricePredictionModelManager:
 
-    def __init__(self):
+    ALL_CROPS = ['arhar', 'bajra', 'barley', 'copra', 'cotton', 'gram', 'groundnut', 'jowar', 'jute', 'maize', 'masoor', 'moong', 'niger', 'paddy', 'ragi', 'safflower', 'sesamum', 'soyabean', 'sugarcane', 'sunflower', 'urad', 'wheat']
+
+    def __init__(self, pretrain=True, pretrain_parallel=True):
         self.prediction_models = {}
+
+        # Prefill the 
+        if pretrain:
+            if pretrain_parallel:
+                Thread(target=self.get_stats_for_current_month).start()
+            else:
+                self.get_stats_for_current_month()
     
-    def predict(self, crop, month, year, rainfall):
+    # Returns the price_data of each crop as a list of tuples [(crop_name, current_month, next_month), ...]
+    # sorted by the current month's prices
+    def get_stats_for_current_month(self, lat=WeatherForecaster.DEFAULT_LAT, lng=WeatherForecaster.DEFAULT_LNG):
 
-        # prediction_model = crop.
+        price_data_list = []
 
-        # if prediction_model: prediction_model.
+        for crop in PricePredictionModelManager.ALL_CROPS: 
+            model = self.get_model_for_crop(crop)
+            price_data = model.predict_next_n_months(2)
+            current_month_price, next_month_price = price_data.values()
+            price_data_list.append((crop, current_month_price, next_month_price))
 
-        pass
+        price_data_list.sort(key= lambda price_data: price_data[1])
 
+        return price_data_list
+
+    def get_model_for_crop(self, crop):
+        if crop in self.prediction_models:
+            return self.prediction_models[crop]
+        else:
+            model = PricePredictonModel(crop)
+            self.prediction_models[crop] = model
+            return model
+    
+    def predict_price_for(self, crop, year, month, rainfall):
+        model = self.get_model_for_crop(crop)
+        return model.predict(year, month, rainfall)
+    
+    def predict_price_for_current_month(self, crop):
+        model = self.get_model_for_crop(crop)
+        return model.predict_price_for_current_month()
+
+    def predict_prices_for_next_n_months(self, crop, n):
+        model = self.get_model_for_crop(crop)
+        return model.predict_prices_for_next_n_months(n)
+    
+    def predict_prices_for_next_8_months(self, crop):
+        model = self.get_model_for_crop(crop)
+        return model.predict_prices_for_next_n_months(8)
+
+# Represent a price prediction model
 class PricePredictonModel:
 
     ENSURE_TRAINED_CHECK_INTERVAL = 1
+    PRICE_DATASETS_DIR_PATH = PRICE_DATASETS_DIR_PATH
 
     def __init__(self, crop, train_parallel=True):
         # A flag that let's the prediction methods know whether the model is trained or not
         self.is_trained = False
+        self._crop = crop.strip().lower()
 
         if train_parallel:
             # Start training the model on a separate thread
@@ -45,57 +94,88 @@ class PricePredictonModel:
 
     # Trains the model and sets the predictor object on self for the recommendation methods
     def _train_model(self):
+
+        # Path to the cache file model to be created/loaded
+        cache_model_path = path.join(PRE_TRAINED_MODELS_DIR_PATH, self._crop)  
+
+        # Load the cached model if it is present
+        if path.isfile(cache_model_path):
+            with open(cache_model_path, "rb") as cache_model_file:
+                model = pickle.load(cache_model_file)
+                self.regressor = model.regressor
+                self.df_columns = model.df_columns
+                self.is_trained = True
+                return
+        
+
+        crop_dataset_path = path.join(self.PRICE_DATASETS_DIR_PATH, f"{self._crop}.csv")
+
+        if not path.isfile(crop_dataset_path):
+            raise PriceDatasetNotFoundException
+
         ## Load the dataset
-        df = pd.read_csv(self.CROP_DATASET_PATH)
+        dataset = None
 
-        ## Clean dataset
+        try:
+            dataset = pd.read_csv(crop_dataset_path)
+        except:
+            raise PriceDatasetFormatInvalidException
+        
+        ## Separate the columns of the dataset into X (params) and Y (result)
 
-        # Replacing missing N, P, K values with 0
-        df.N = df.N.fillna(value = 0)
-        df.P = df.P.fillna(value = 0)
-        df.K = df.K.fillna(value = 0)
+        # Get all the columns except the result WPI
+        X = dataset.drop('WPI', axis = 1)
 
-        # Replacing missing temperature, humidity, ph and rainfall values with the mean
-        df.temperature = df.temperature.fillna(value = df.temperature.mean())
-        df.humidity = df.humidity.fillna(value = df.humidity.mean())
-        df.ph = df.ph.fillna(value = df.ph.mean())
-        df.rainfall = df.rainfall.fillna(value = df.rainfall.mean())
+        self.df_columns = X.columns
 
-        # Replacing missing labels with the most repeated label
-        df.label = df.label.fillna(value = df.label.mode()[0])
+        # Only get the last column
+        Y = dataset['WPI']
 
-        ## Splitting the dataset into testing and training data
+        ## Split the dataset into train and test dataset
+        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.1, random_state=0)
 
-        # Obtaining an instance of the dataset without the label
-        x = df.drop('label', axis = 1)
-
-        self.df_columns = x.columns
-
-        # Obtaining just the label column
-        y = df['label']
-
-        # Actually splitting the dataset
-        x_train , x_test , y_train , y_test = train_test_split(x, y, test_size = 0.30, random_state = 10)
-
-        ## Training the model using random forest classifier
-        predictor = RandomForestClassifier(n_estimators = 500, criterion = "entropy")
-        predictor.fit(x_train, y_train)
+        ## Perform the required training using decision tree regressor
+        regressor = DecisionTreeRegressor(max_depth=10, random_state=0)
+        regressor.fit(X, Y)
 
         # Setting the predictor as the recommender's main predictor
-        self.predictor = predictor
+        self.regressor = regressor
 
         # Setting the flag to indicate that the model has been trained
         self.is_trained = True
 
+        # Save the trained model in cache
+        with open(cache_model_path, "wb") as file:
+            pickle.dump(self, file=file, protocol=pickle.HIGHEST_PROTOCOL)
+
+    # Performs an direct prediction query to the ML model
+    def raw_predict(self, year, month, rainfall):
+        self.ensure_trained()
+        return self.regressor.predict(pd.DataFrame([[month, year, rainfall]], columns=self.df_columns))[0]
+    
+    # Predicts the possible prices for the given year and month based on their location
+    def predict_price(self, year, month, lat=WeatherForecaster.DEFAULT_LAT, lng=WeatherForecaster.DEFAULT_LNG):
+        self.ensure_trained()
+        rainfall = weather_forecaster.get_rainfall_for_month(year, month, lat, lng)
+        return self.regressor.predict(pd.DataFrame([[month, year, rainfall]], columns=self.df_columns))[0]
+    
+    # Predict the prices for the current month
+    def predict_price_for_current_month(self, lat=WeatherForecaster.DEFAULT_LAT, lng=WeatherForecaster.DEFAULT_LNG):
+        today = datetime.date.today()
+        return self.predict_price(today.year, today.month, lat, lng)    
+
+    def predict_next_n_months(self, n, lat=WeatherForecaster.DEFAULT_LAT, lng=WeatherForecaster.DEFAULT_LNG):
+        self.ensure_trained()
+
+        rainfall_data = weather_forecaster.get_rainfall_for_next_n_months(n, lat, lng)
+
+        result = {}
+
+        for year, month in rainfall_data:
+            rainfall = rainfall_data[(year, month)]
+            result[(year, month)] = self.raw_predict(year, month, rainfall)
+
+        return result
+
 class PriceDatasetNotFoundException(Exception): pass
 class PriceDatasetFormatInvalidException(Exception): pass    
-
-# Test Driver
-def main():
-    price_predictor = PricePredictonModel()
-    print(price_predictor.recommend(49, 69, 82, 18.3, 15.3, 7.3, 81.78))
-    print(price_predictor.recommend(123, 123, 82, 123.3, 333.3, 123.3, 22.78))
-    print(price_predictor.recommend(1231, 11, 82, 1128.3, 22.3, 123.3, 44.78))
-
-if __name__ == "__main__":
-    main()

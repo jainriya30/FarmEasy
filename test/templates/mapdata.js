@@ -1,19 +1,19 @@
 let all_states = {{ states }};
 
 function fix_missing_state(state_name) {
-  if (state_name == "Telangana") return "Andhra Pradesh";
+  state_name = state_name.trim();
+  if (state_name.trim() == "Telangana") return "Andhra Pradesh";
   if (state_name == "Ladakh") return "Jammu and Kashmir";
   return state_name;
 }
 
 function highlight_states(states) {
-
   _clear_existing_highlight();
   simplemaps_countrymap.refresh();
 
   if (states.length == 0) return;
 
-  states = JSON.parse(states);  
+  states = JSON.parse(states);    
   for(var i in states) {
     var state_name = states[i];
     state_name = fix_missing_state(state_name);
