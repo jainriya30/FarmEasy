@@ -1,3 +1,4 @@
 from .crop_recommendation import CropRecommendationModel
 from .price_prediction import PricePredictionModelManager, PricePredictonModel
 from .production_statistics import ProductionStatsModel, CropNotFoundException, StateNotFoundException
+from .crop_info import crop_details

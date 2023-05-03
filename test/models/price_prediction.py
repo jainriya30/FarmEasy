@@ -5,6 +5,7 @@ from time import sleep
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.model_selection import train_test_split
 from .weather_data import WeatherForecaster
+from dateutil.relativedelta import relativedelta
 import datetime
 import pickle
 
@@ -34,11 +35,11 @@ class PricePredictionModelManager:
 
         for crop in PricePredictionModelManager.ALL_CROPS: 
             model = self.get_model_for_crop(crop)
-            price_data = model.predict_next_n_months(2)
+            price_data = model.predict_prices_for_next_n_months(2)
             current_month_price, next_month_price = price_data.values()
             price_data_list.append((crop, current_month_price, next_month_price))
 
-        price_data_list.sort(key= lambda price_data: price_data[1])
+        price_data_list.sort(key= lambda price_data: -price_data[1])
 
         return price_data_list
 
@@ -57,6 +58,10 @@ class PricePredictionModelManager:
     def predict_price_for_current_month(self, crop):
         model = self.get_model_for_crop(crop)
         return model.predict_price_for_current_month()
+    
+    def predict_price_for_last_month(self, crop):
+        model = self.get_model_for_crop(crop)
+        return model.predict_price_for_last_month()
 
     def predict_prices_for_next_n_months(self, crop, n):
         model = self.get_model_for_crop(crop)
@@ -164,7 +169,11 @@ class PricePredictonModel:
         today = datetime.date.today()
         return self.predict_price(today.year, today.month, lat, lng)    
 
-    def predict_next_n_months(self, n, lat=WeatherForecaster.DEFAULT_LAT, lng=WeatherForecaster.DEFAULT_LNG):
+    def predict_price_for_last_month(self, lat=WeatherForecaster.DEFAULT_LAT, lng=WeatherForecaster.DEFAULT_LNG):
+        last_month_date = datetime.date.today() - relativedelta(months=1)
+        return self.predict_price(last_month_date.year, last_month_date.month, lat, lng)    
+
+    def predict_prices_for_next_n_months(self, n, lat=WeatherForecaster.DEFAULT_LAT, lng=WeatherForecaster.DEFAULT_LNG):
         self.ensure_trained()
 
         rainfall_data = weather_forecaster.get_rainfall_for_next_n_months(n, lat, lng)

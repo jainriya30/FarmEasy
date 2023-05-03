@@ -1,13 +1,16 @@
 from flask import Flask, render_template, request, abort
-from models import CropRecommendationModel, PricePredictionModelManager, ProductionStatsModel, CropNotFoundException, StateNotFoundException
+from models import CropRecommendationModel, PricePredictionModelManager, ProductionStatsModel, CropNotFoundException, StateNotFoundException, crop_details
 import traceback
 import json
 
 crop_recommender = CropRecommendationModel()
+prices_predictor = PricePredictionModelManager()
 crop_stats = ProductionStatsModel()
 
 app = Flask(__name__, static_url_path='/')
 app.config.update(TEMPLATES_AUTO_RELOAD=True)
+
+ALL_MONTHS = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec']
 
 @app.route('/')
 def landing_page():
@@ -21,6 +24,7 @@ CROP_RECOMMENDATION_ARGS = ['temperature', 'humidity', 'rainfall', 'ph', 'n-val'
 
 @app.route('/crop-recommendation', methods=["GET", "POST"])
 def crop_prediction_page():
+    print(request.form)
     if request.method == "POST":
         try:
             temperature = request.form["temperature"]
@@ -32,7 +36,7 @@ def crop_prediction_page():
             k = request.form["k-val"]
 
             crop = crop_recommender.recommend(n, p, k, temperature, humidity, ph, rainfall)
-
+            
             return json.dumps(crop)
 
         except KeyError as e:
@@ -43,7 +47,7 @@ def crop_prediction_page():
 
 @app.route('/price-prediction')
 def price_prediction_page():
-    return render_template('price_prediction.html')
+    return render_template('price_prediction.html', price_data=prices_predictor.get_stats_for_current_month())
 
 @app.route('/top-crops')
 def top_crops():
@@ -112,6 +116,25 @@ def top_states_for_crop():
 #             abort(500)
             
 #     return abort(403)
+
+@app.route('/commodity/<crop>')
+def index(crop):
+    if crop in PricePredictionModelManager.ALL_CROPS:
+        monthly_data = prices_predictor.predict_prices_for_next_8_months(crop)
+        months_as_list = json.dumps([f"{ALL_MONTHS[data[1]]} {data[0]}" for data in monthly_data])
+        values_as_list = list(monthly_data.values())
+        monthly_data = (months_as_list, values_as_list)
+
+        last_month_price = prices_predictor.predict_price_for_last_month(crop)
+        crop_data = crop_details(crop)
+        top_producers = None
+        try:
+            top_producers = crop_stats.top_states_for_crop(crop)
+        except CropNotFoundException:
+            top_producers = crop_data["states"]
+        return render_template("commodity.html", crop_name=crop, last_month_price=last_month_price, monthly_data=monthly_data, crop_info=crop_data, top_producers=top_producers)
+    else:
+        abort(404)
 
 @app.route('/test')
 def test():

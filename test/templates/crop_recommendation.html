@@ -125,7 +125,7 @@ Humidity: https://archive-api.open-meteo.com/v1/archive?latitude=52.52&longitude
 
     <section id="parameters">
 
-        <form method="POST">
+        <form id="model1form" method="POST">
             <div class="para-cont">
                 <div class="row para-row">
                     <div class="col para-item">
@@ -308,5 +308,33 @@ Humidity: https://archive-api.open-meteo.com/v1/archive?latitude=52.52&longitude
       });
 
       map.getContainer().appendChild(locationBtn);
+
+      function submitForm() {
+          // Get the form element
+          const form = document.querySelector('#model1form');
+
+          // Create a new FormData object and add the form data to it
+          const formData = new FormData(form);
+
+          // Create a new XMLHttpRequest object
+          const xhr = new XMLHttpRequest();
+
+          // Set the HTTP method and URL
+          xhr.open('POST', '/crop-recommendation');
+
+          // Set the content type header
+          xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+          // Define the callback function to handle the response
+          xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+              console.log(xhr.responseText);
+            }
+          };
+
+          // Send the request
+          xhr.send(formData);
+
+      }
     </script>
 </body>

@@ -13,18 +13,15 @@ class WeatherForecaster:
     def __init__(self):
         self._monthly_rainfall_cache = {}
 
-    # def get_rainfall_for_next_8_months(self, lat=DEFAULT_LAT, lng=DEFAULT_LNG):
-    #     return self.get_rainfall_for_next_n_months(8, lat, lng)
-
     def get_rainfall_for_next_n_months(self, n, lat=52.52, lng=13.41):
         today = datetime.date.today()
-        fd_m = datetime.date(today.year, today.month, 1)
+        current_month = datetime.date(today.year, today.month, 1)
 
         data = {}
 
         for i in range(n):
-            fd_cm = fd_m + relativedelta(month=i)
-            data[(fd_cm.year, fd_cm.month)] = self.get_rainfall_for_month(fd_cm.year, fd_cm.month, lat, lng)
+            current_month = datetime.datetime(current_month.year + int(current_month.month / 12), ((current_month.month % 12) + 1), 1)
+            data[(current_month.year, current_month.month)] = self.get_rainfall_for_month(current_month.year, current_month.month, lat, lng)
 
         return data
 
@@ -56,7 +53,8 @@ class WeatherForecaster:
         else:
             data_link = f"https://seasonal-api.open-meteo.com/v1/seasonal?latitude={lat}&longitude={lng}&daily=precipitation_sum&start_date={start_date}&end_date={end_date}"
             data = json.loads(requests.get(data_link).content)
-            rainfall = sum(data["daily"]["precipitation_sum_member04"])
+            cleaned_data = [r for r in data["daily"]["precipitation_sum_member04"] if r != None]
+            rainfall = sum(cleaned_data)            
 
             self._monthly_rainfall_cache[cache_str] = rainfall
             return rainfall
