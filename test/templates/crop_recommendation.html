@@ -170,7 +170,7 @@ Humidity: https://archive-api.open-meteo.com/v1/archive?latitude=52.52&longitude
     <script>
       function sum(arr) {
         var sum = 0;
-        for (var value in arr) sum += parseInt(value);
+        for (var i in arr) sum += parseInt(arr[i]);
         return sum;
       }
 
@@ -206,9 +206,8 @@ Humidity: https://archive-api.open-meteo.com/v1/archive?latitude=52.52&longitude
         var h_data = (await (await fetch(h_data_link)).json());
         console.log(h_data);
         h_data = h_data["hourly"]["relativehumidity_2m"];
-        var avg_humidity = avg(h_data);
 
-        console.log(avg_temp, total_rainfall, avg_humidity);
+        var avg_humidity = avg(h_data);
 
         document.getElementById("temperature").value = avg_temp;
         document.getElementById("rainfall").value = total_rainfall;
